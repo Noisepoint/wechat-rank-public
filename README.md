@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WeChat Rank Public
 
-## Getting Started
+一个只读的 AI 公众号热榜展示站。
 
-First, run the development server:
+这个仓库是公开展示版，只保留热榜浏览、筛选搜索和文章详情预览。采集、账号管理、收藏、日报、邮件、后台设置等能力不包含在本仓库中。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+线上示例：
+
+```text
+https://wechat-rank-public.vercel.app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 功能
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- 日榜、周榜、月榜
+- 综合热度、超常发挥、互动质量三种排序
+- 按 AI 领域、文章类型、标题关键词、公众号名称筛选
+- 查看文章详情和原文链接
+- 只读访问 Supabase 数据
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 环境变量
 
-## Learn More
+只需要配置 Supabase 的公开读取信息：
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_publishable_or_anon_key
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+不要在公开部署中配置 `SUPABASE_SERVICE_ROLE_KEY`。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 本地运行
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+打开：
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+http://localhost:3000
+```
+
+## 数据要求
+
+项目会读取以下只读数据：
+
+- `articles`
+- `accounts`
+- `settings` 中的 `algorithm.minRead`
+
+如果使用 Supabase RLS，请给匿名角色配置必要的 `SELECT` 权限。
+
+## 部署
+
+推荐部署到 Vercel，并只配置上面的两个环境变量。
+
+```bash
+npm run build
+```
+
+## 说明
+
+这个仓库不包含后台采集和管理逻辑。它适合作为公开链接或产品展示页使用，不适合作为完整后台系统直接运行。

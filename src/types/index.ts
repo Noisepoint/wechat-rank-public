@@ -46,50 +46,6 @@ export interface Article {
   is_favorited?: boolean;
 }
 
-// 收藏
-export interface Favorite {
-  id: string;
-  article_id: string;
-  note: string | null;
-  created_at: string;
-  article?: Article;
-}
-
-// 设置
-export interface Settings {
-  algorithm: AlgorithmConfig;
-  email: EmailConfig;
-  cron: CronConfig;
-}
-
-export interface AlgorithmConfig {
-  w1: number;  // 点赞权重
-  w2: number;  // 在看权重
-  w3: number;  // 评论权重
-  w4: number;  // 收藏权重
-  w5: number;  // 转发权重
-  minRead: number;  // 入榜门槛
-}
-
-export interface EmailConfig {
-  time: string;
-  address: string;
-  enabled: boolean;
-}
-
-export interface CronConfig {
-  time: string;
-}
-
-// API用量
-export interface ApiUsage {
-  id: string;
-  date: string;
-  call_count: number;
-  cost: number;
-  created_at: string;
-}
-
 // 榜单类型
 export type RankType = 'outperform' | 'engagement' | 'heat';
 export type PeriodType = 'day' | 'week' | 'month';
