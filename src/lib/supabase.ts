@@ -21,6 +21,15 @@ export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
   : (null as unknown as SupabaseClient);
 
+// 公网只读版服务端使用：只使用 anon key，不带 service role 高权限。
+export function createPublicReadClient() {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase URL and Anon Key are required');
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
+
 // 服务端使用（有更高权限）
 export function createServerClient() {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';

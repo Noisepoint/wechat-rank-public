@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
+import { createPublicReadClient } from '@/lib/supabase';
 
 // GET - 获取文章详情
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const supabase = createServerClient();
+  const supabase = createPublicReadClient();
 
   try {
     const { data: article, error } = await supabase
@@ -15,8 +15,7 @@ export async function GET(
       .select(
         `
         *,
-        account:accounts(id, name, avatar_url, description),
-        favorite:favorites(id, note)
+        account:accounts(id, name, avatar_url, description)
       `
       )
       .eq('id', id)
@@ -53,9 +52,9 @@ export async function GET(
         aiCategory: article.ai_category,
         articleType: article.article_type,
         categoryManual: article.category_manual,
-        isFavorited: article.favorite && article.favorite.length > 0,
-        favoriteId: article.favorite?.[0]?.id || null,
-        favoriteNote: article.favorite?.[0]?.note || null,
+        isFavorited: false,
+        favoriteId: null,
+        favoriteNote: null,
       },
     });
   } catch (error) {
@@ -67,71 +66,7 @@ export async function GET(
   }
 }
 
-// PATCH - 更新文章信息（支持手动修正分类）
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  const supabase = createServerClient();
-
-  try {
-    const body = await request.json();
-    const { aiCategory, articleType } = body;
-
-    // 构建更新数据
-    const updateData: Record<string, unknown> = {};
-
-    if (aiCategory !== undefined) {
-      updateData.ai_category = aiCategory;
-      updateData.category_manual = true; // 标记为手动修改
-    }
-
-    if (articleType !== undefined) {
-      updateData.article_type = articleType;
-      updateData.category_manual = true; // 标记为手动修改
-    }
-
-    if (Object.keys(updateData).length === 0) {
-      return NextResponse.json(
-        { success: false, error: '没有要更新的字段' },
-        { status: 400 }
-      );
-    }
-
-    const { data: article, error } = await supabase
-      .from('articles')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    if (!article) {
-      return NextResponse.json(
-        { success: false, error: '文章不存在' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: article.id,
-        aiCategory: article.ai_category,
-        articleType: article.article_type,
-        categoryManual: article.category_manual,
-      },
-      message: '分类更新成功',
-    });
-  } catch (error) {
-    console.error('更新文章失败:', error);
-    return NextResponse.json(
-      { success: false, error: '更新文章失败' },
-      { status: 500 }
-    );
-  }
+// 公网版不提供文章修改能力。
+export async function PATCH() {
+  return NextResponse.json({ error: 'Not found' }, { status: 404 });
 }

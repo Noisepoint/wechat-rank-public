@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase';
+import { createPublicReadClient } from '@/lib/supabase';
 import { getDayStartIsoDaysAgo, getIsoDaysAgo } from '@/lib/date';
 import type { PeriodType, RankType } from '@/types';
 
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '20', 10);
 
-  const supabase = createServerClient();
+  const supabase = createPublicReadClient();
 
   try {
     // 获取算法设置中的入榜门槛
@@ -63,8 +63,7 @@ export async function GET(request: NextRequest) {
       .select(
         `
         *,
-        account:accounts(id, name, avatar_url),
-        favorite:favorites(id)
+        account:accounts(id, name, avatar_url)
       `,
         { count: 'exact' }
       )
@@ -127,11 +126,7 @@ export async function GET(request: NextRequest) {
 
     // 格式化返回数据
     const items = (articles || []).map((article, index) => ({
-      // favorites 表对 articles 是 1:N，这里按“最多1条收藏记录”处理
-      favoriteId:
-        Array.isArray(article.favorite) && article.favorite.length > 0
-          ? article.favorite[0].id
-          : article.favorite?.id || null,
+      favoriteId: null,
       id: article.id,
       rank: from + index + 1,
       title: article.title,
@@ -151,10 +146,7 @@ export async function GET(request: NextRequest) {
       heatScore: article.heat_score,
       aiCategory: article.ai_category,
       articleType: article.article_type,
-      isFavorited: !!(
-        (Array.isArray(article.favorite) && article.favorite.length > 0) ||
-        article.favorite?.id
-      ),
+      isFavorited: false,
     }));
 
     const total = count || 0;
